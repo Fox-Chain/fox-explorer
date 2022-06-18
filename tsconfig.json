@@ -1,0 +1,3 @@
+{
+  "extends": "./newclient/tsconfig.json"
+}
