@@ -2,7 +2,7 @@ module.exports = {
     client: {
         service: {
             name: 'api',
-            url: 'https://hbfzqg7jia.execute-api.us-west-2.amazonaws.com/dev',
+            url: 'http://localhost:4000/',
             includes: ['**/*.graphql'],
             excludes: ['node_modules/**/*']
         }
