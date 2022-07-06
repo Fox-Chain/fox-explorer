@@ -1,12 +1,23 @@
-const { ApolloServer, gql } = require('apollo-server');
+// @ts-check
+const { createServer } = require("http");
+const express = require("express");
+const { execute, subscribe } = require("graphql");
+const { ApolloServer, gql } = require("apollo-server-express");
+const { PubSub } = require("graphql-subscriptions");
+const { SubscriptionServer } = require("subscriptions-transport-ws");
+const { makeExecutableSchema } = require("@graphql-tools/schema");
 
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// your data.
+(async () => {
+  
+const PORT = 4000;
+const pubsub = new PubSub();
+const app = express();
+const httpServer = createServer(app);
+
+// Schema definition
 const typeDefs = gql`
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-  # This "Book" type defines the queryable fields for every book in our data source.
   type BlockInfo {
     number: Int
     avgBlockTime: Float
@@ -74,19 +85,21 @@ const typeDefs = gql`
     getTimestamp: String
     getAllEthTransfers(limit: Int, nextKey: String): ETHTransfers
   }
+
+  type Subscription {
+    numberIncremented: Int
+    newBlockFeed: BlockSummary
+  }
 `;
 
-
 const latestBlockInfo = {
-    number: 100,
-    avgBlockTime: 3.6,
-    hashRate: '1234000000000',
-    difficulty: '123000000000',
+  number: 100,
+  avgBlockTime: 3.6,
+  hashRate: '1234000000000',
+  difficulty: '123000000000',
 };
 
-
-// Resolvers define the technique for fetching the types defined in the
-// schema. This resolver retrieves books from the "books" array above.
+  // Resolver map
 const resolvers = {
   Query: {
     getLatestBlockInfo: () => latestBlockInfo,
@@ -156,18 +169,57 @@ const resolvers = {
       return {transfers: ethTransfers, nextKey: '12345'}
     },
   },
+  Subscription: {
+    numberIncremented: {
+      subscribe: () => pubsub.asyncIterator(["NUMBER_INCREMENTED"]),
+    },
+    newBlockFeed: {
+      subscribe: () => pubsub.asyncIterator(["NEW_BLOCK_FEED"]),
+    },
+  },
 };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  csrfPrevention: true,
-  cache: 'bounded',
+  schema,
+});
+await server.start();
+server.applyMiddleware({ app });
+
+SubscriptionServer.create(
+  { schema, execute, subscribe },
+  { server: httpServer, path: server.graphqlPath }
+);
+
+httpServer.listen(PORT, () => {
+  console.log(
+    `🚀 Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`
+  );
+  console.log(
+    `🚀 Subscription endpoint ready at ws://localhost:${PORT}${server.graphqlPath}`
+  );
 });
 
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+// In the background, increment a number every second and notify subscribers when
+// it changes.
+let currentNumber = 0;
+function incrementNumber() {
+  currentNumber++;
+  pubsub.publish("NUMBER_INCREMENTED", { numberIncremented: currentNumber });
+  const timestamp = new Date().getTime()
+  const blockSummary = {
+    number: currentNumber + 100,
+    miner: '0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8',
+    txCount: 39,
+    timestamp: Math.floor(timestamp/1000),
+    rewards: {total: '1234000000000000000'},
+    txFail: 2
+  }
+  pubsub.publish("NEW_BLOCK_FEED", { newBlockFeed: blockSummary });
+  setTimeout(incrementNumber, 1000);
+}
+// Start incrementing
+incrementNumber();
+
+})();
