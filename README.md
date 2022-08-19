@@ -1,4 +1,4 @@
-# The Block Explorer for Fox Ethereum
+# The Block Explorer for Fox
  
  the website: [http://explorer.fox.tech](http://explorer.fox.tech)
  
