@@ -47,14 +47,14 @@ Vue.use(VueMatomo, MatomoConfigs)
 Vue.use(Vuetify, {
     theme: {
         // used -->
-        primary: '#3d55a5',
-        secondary: '#6270fc',
-        accent: '#4a67c6',
+        primary: '#FFC100',//'#3d55a5',
+        secondary: '#FFC100',//'#6270fc',
+        accent: '#FFC100', //'#4a67c6',
         success: '#92cce1',
         warning: '#fed9a1',
         error: '#fe8778',
         info: '#8391a8',
-        nav: '#a0a8fd',
+        nav: '#ffffff', //'#a0a8fd',
         txSuccess: '#00b173',
         txFail: '#fe1377',
         txPen: '#eea66b',

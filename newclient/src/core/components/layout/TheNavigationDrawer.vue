@@ -5,7 +5,7 @@
           NAVIGATION DRAWER
         =====================================================================================
         -->
-        <v-navigation-drawer v-model="drawer" :mini-variant="mini" class="primary elevation-3 pt-3" app mini-variant-width="100px">
+        <v-navigation-drawer v-model="drawer" :mini-variant="mini" class="black elevation-3 pt-3" app mini-variant-width="100px">
             <v-layout column fill-height>
                 <v-flex>
                     <!--
@@ -149,7 +149,7 @@ export default class TheNavigationDrawer extends Vue {
   ===================================================================================
   */
 
-    supportEmail = 'support@ethvm.com'
+    supportEmail = 'admin@fox.tech'
     drawer: boolean = false
     active = 0
     sublink = null
@@ -179,7 +179,7 @@ export default class TheNavigationDrawer extends Vue {
     }
 
     get headerColor(): string {
-        return this.showMobile ? 'primary' : 'white'
+        return this.showMobile ? 'black' : 'white'
     }
 
     get items(): NavMenuEntry[] {

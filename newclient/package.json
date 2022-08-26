@@ -5,7 +5,7 @@
     "author": "EthVM Team",
     "private": true,
     "scripts": {
-        "start:dev": "SET NODE_ENV=development && vue-cli-service serve",
+        "start:dev": "export NODE_ENV=development && vue-cli-service serve",
         "build": "vue-cli-service --mode production build",
         "build:staging": "vue-cli-service --mode staging build",
         "build:hash": "ROUTER_MODE=hash yarn build",
